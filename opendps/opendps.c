@@ -76,6 +76,9 @@
 #include "func_gen.h"
 #endif // CONFIG_FUNCGEN_ENABLE
 
+#define SWOOP_FW 0
+#define SWOOP_HV 1
+
 #ifdef DPS_EMULATOR
 #include "dpsemul.h"
 #endif // DPS_EMULATOR
@@ -1016,6 +1019,7 @@ int main(int argc, char const *argv[])
     read_past_settings();
     ui_init();
 
+
 #ifdef CONFIG_WIFI
     /** Rationale: the ESP8266 could send this message when it starts up but
       * the current implementation spews wifi/network related messages on the
@@ -1036,5 +1040,13 @@ int main(int argc, char const *argv[])
     uui_refresh(current_ui, true);
 #endif // CONFIG_SPLASH_SCREEN
     event_handler();
+
+
+    // enable CL mode
+    cl_enable(true);
+    pwrctl_set_vout(51000);
+    pwrctl_set_iout(6000);
+    pwrctl_enable_vout(true);
+
     return 0;
 }
