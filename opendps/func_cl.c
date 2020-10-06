@@ -215,7 +215,7 @@ static set_param_status_t get_parameter(char *name, char *value, uint32_t value_
  */
 static void cl_enable(bool enabled)
 {
-    emu_printf("[CL] %s output\n", enabled ? "Enable" : "Disable");
+    dbg_printf("[CL] %s output\n", enabled ? "Enable" : "Disable");
     if (enabled) {
         /** Display will now show the current values, keep the user setting saved */
         saved_u = cl_voltage.value;
@@ -335,6 +335,19 @@ static void cl_tick(void)
         int32_t vout_actual = pwrctl_calc_vout(v_out_raw);
         int32_t cout_actual = pwrctl_calc_iout(i_out_raw);
 
+        // ramp down current as we approach end voltage
+        //pwrctl_set_iout(calc_swoop_current(vout_actual));
+        //set_parameter("current", "3000");
+        cl_voltage.value = SWOOP_VOLT+SWOOP_VOLT_DROP;
+        voltage_changed(&cl_voltage);
+
+        cl_current.value = calc_swoop_current(vout_actual);
+        //cl_current.value = SWOOP_CURR;
+
+        current_changed(&cl_current);
+
+        dbg_printf("Current is %d\n",cout_actual);
+
         if (cl_voltage.ui.has_focus) {
             /** If the voltage setting has focus, make sure we're displaying
               * the desired setting and not the current output value. */
@@ -403,4 +416,43 @@ void func_cl_init(uui_t *ui)
     cl_voltage.cur_digit = 2;
     number_init(&cl_current);
     uui_add_screen(ui, &cl_screen);
+}
+
+uint32_t calc_swoop_current(int32_t voltage)
+{
+    //remove drop across schottky
+    voltage -= SWOOP_VOLT_DROP;
+
+    if (voltage<0){
+        return 0;
+    }
+
+    if (voltage <= SWOOP_RAMP_START_VOLTAGE)
+    {
+        dbg_printf("Voltage (%dmV) < Ramp start (%dmV)\t Curr: %dmA\n",voltage, SWOOP_RAMP_START_VOLTAGE, SWOOP_CURR);
+        return (uint32_t)SWOOP_CURR;
+    }
+
+    if (voltage >= SWOOP_VOLT){
+        dbg_printf("Voltage (%dmV) > End V(%dmV)\t Curr: %dmA\n",voltage, SWOOP_VOLT, SWOOP_RAMP_END_CURR);
+        return (uint32_t)SWOOP_RAMP_END_CURR;
+    }
+
+    int32_t i_cmd;
+    int32_t swoop_curr = (uint32_t)SWOOP_CURR;
+    int32_t swoop_ramp_end_curr = (uint32_t)SWOOP_RAMP_END_CURR;
+    int32_t swoop_volt = (uint32_t)SWOOP_VOLT;
+    int32_t swoop_ramp_start_voltage = (uint32_t)SWOOP_RAMP_START_VOLTAGE;
+
+
+    float scalar = (swoop_ramp_end_curr-swoop_curr)/(swoop_volt-swoop_ramp_start_voltage);
+
+
+    i_cmd = (uint32_t)(SWOOP_CURR + scalar *(voltage-swoop_ramp_start_voltage));
+    //i_cmd = SWOOP_CURR;
+    dbg_printf("From Voltage %dmV \tCalulated ramped current: %dmA\n",voltage,i_cmd);
+    if (i_cmd>0){
+        return i_cmd;
+    }
+    return 0;
 }

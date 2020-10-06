@@ -5,7 +5,7 @@ COMMANDLINE := 0
 BAUDRATE ?= 9600
 
 # Set build model, defaults to DPS5005
-MODEL := DPS5005
+MODEL := DPS5020
 
 BINARY = opendps_$(MODEL)
 
@@ -21,11 +21,11 @@ WIFI := 1
 
 # Maximum current your DPS model can provide. Eg 5000mA for the DPS5005
 # This is usually set by MODEL but you can override it here
-#MAX_CURRENT := 5000
+MAX_CURRENT := 20000
 # Please note that the UI currently does not handle settings larger that 9.99A
 
 # Print debug information on the serial output
-DEBUG ?= 0
+DEBUG ?= 1
 
 # Font file
 METER_FONT_FILE ?= gfx/Ubuntu-C.ttf

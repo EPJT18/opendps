@@ -305,6 +305,7 @@ static command_status_t handle_list_parameters(void)
 static command_status_t handle_enable_output(frame_t *frame)
 {
     emu_printf("%s\n", __FUNCTION__);
+    dbg_printf("handle_enable_output\n");
     uint8_t cmd;
     uint8_t enable_byte;
     start_frame_unpacking(frame);
@@ -508,6 +509,10 @@ static command_status_t handle_change_screen(frame_t *frame)
   */
 static void handle_frame(uint8_t *data, uint32_t length)
 {
+
+    // do nothing as we aren't expecting serial
+    return;
+    
     command_status_t success = cmd_failed;
     command_t cmd = cmd_response;
 

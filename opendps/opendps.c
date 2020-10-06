@@ -397,8 +397,11 @@ bool opendps_clear_calibration(void)
  */
 bool opendps_enable_output(bool enable)
 {
+    dbg_printf("en_out\n");
     if (!is_temperature_locked && current_ui->screens[current_ui->cur_screen]->enable) {
+        dbg_printf("something\n");
         if (current_ui->screens[current_ui->cur_screen]->is_enabled != enable) {
+            dbg_printf("ovt\n");
             event_put(event_button_enable, press_short); /** @todo: call directly as this will not work for temperature alarm */
         }
     } else {
@@ -448,15 +451,15 @@ static void ui_init(void)
 
     /** Initialise the function screens */
     uui_init(&func_ui, &g_past);
-    func_cv_init(&func_ui);
+    //func_cv_init(&func_ui);
 #ifdef CONFIG_CC_ENABLE
-    func_cc_init(&func_ui);
+    //func_cc_init(&func_ui);
 #endif // CONFIG_CC_ENABLE
 #ifdef CONFIG_CL_ENABLE
     func_cl_init(&func_ui);
 #endif // CONFIG_CL_ENABLE
 #ifdef CONFIG_FUNCGEN_ENABLE
-    func_gen_init(&func_ui);
+    //func_gen_init(&func_ui);
 #endif // CONFIG_FUNCGEN_ENABLE
 
 
@@ -634,9 +637,14 @@ static void ui_tick(void)
         return;
     }
 
+    dbg_printf("1\n");
+    dbg_printf(current_ui->cur_screen);
+
     last = get_ticks();
     uui_tick(current_ui);
+    dbg_printf("2\n");
     uui_tick(&main_ui);
+    dbg_printf("3\n");
 
 #ifndef CONFIG_SPLASH_SCREEN
     {
@@ -955,6 +963,9 @@ static void check_master_reset(void)
 static void event_handler(void)
 {
     while(1) {
+        // ui_tick();
+        // continue;
+
         event_t event;
         uint8_t data = 0;
         if (!event_get(&event, &data)) {
@@ -1035,6 +1046,18 @@ int main(int argc, char const *argv[])
     tft_clear();
     uui_refresh(current_ui, true);
 #endif // CONFIG_SPLASH_SCREEN
+    //opendps_enable_output(true);
+    dbg_printf("Swoop test\n");
+    
+    
+    dbg_printf("V: %d, C: %d\n",SWOOP_VOLT, SWOOP_CURR);
+    
+    // pwrctl_set_vout(SWOOP_VOLT);
+    // pwrctl_set_iout(SWOOP_CURR);
+    ui_screen_t *screen = current_ui->screens[current_ui->cur_screen];
+    dbg_printf("init en\n");
+    screen->enable(true);
+
     event_handler();
     return 0;
 }

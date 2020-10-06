@@ -42,6 +42,29 @@
  * */
 
 /** Contribution by @cleverfox */
+
+#define SWOOP_HV
+
+#if defined(SWOOP_FW)
+    #define CELLS 10
+    #define SWOOP_CURR 8000
+    #define SWOOP_ADJ 1500
+    #define SWOOP_VOLT 4200 * CELLS + SWOOP_ADJ
+    #define SWOOP_VOLT_DROP 500
+    #define SWOOP_RAMP_START_VOLTAGE 4000 * CELLS
+    #define SWOOP_RAMP_END_CURR 2000
+#elif defined(SWOOP_HV)
+    #define CELLS 12
+    #define SWOOP_CURR 6000
+    #define SWOOP_ADJ 1400
+    #define SWOOP_VOLT 4200 * CELLS + SWOOP_ADJ
+    #define SWOOP_VOLT_DROP 500
+    #define SWOOP_RAMP_START_VOLTAGE 4000 * CELLS
+    #define SWOOP_RAMP_END_CURR 2000
+#else
+    #error "Please set battery type you want to build for (-DSWOOP_FW or -DSWOOP_HV)"
+#endif
+
 #if defined(DPS5020)
  #ifndef CONFIG_DPS_MAX_CURRENT
   #define CONFIG_DPS_MAX_CURRENT (20000) // Please note that the UI currently does not handle settings larger that 9.99A

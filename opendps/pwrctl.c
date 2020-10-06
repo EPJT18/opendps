@@ -25,6 +25,7 @@
 #include "pwrctl.h"
 #include "dps-model.h"
 #include "pastunits.h"
+#include "dbg_printf.h"
 #include <gpio.h>
 #include <dac.h>
 
@@ -109,6 +110,7 @@ bool pwrctl_set_vout(uint32_t value_mv)
     if (v_out_enabled) {
         /** Needed for the DPS5005 "communications version" (the one with BT/USB) */
         DAC_DHR12R1 = pwrctl_calc_vout_dac(v_out);
+        dbg_printf("vout set: %d\n",v_out);
     } else {
         DAC_DHR12R1 = 0;
     }
@@ -125,6 +127,7 @@ bool pwrctl_set_iout(uint32_t value_ma)
     i_out = value_ma;
     if (v_out_enabled) {
         DAC_DHR12R2 = pwrctl_calc_iout_dac(value_ma);
+        dbg_printf("iout set: %d\n",i_out);
     } else {
         DAC_DHR12R2 = 0;
     }
@@ -201,6 +204,7 @@ uint32_t pwrctl_get_vlimit(void)
 void pwrctl_enable_vout(bool enable)
 {
     v_out_enabled = enable;
+    dbg_printf("vout_enabled: %d\n",(int)enable);
     if (v_out_enabled) {
       (void) pwrctl_set_vout(v_out);
       (void) pwrctl_set_iout(i_out);
@@ -285,6 +289,9 @@ uint16_t pwrctl_calc_vout_dac(uint32_t v_out_mv)
 uint32_t pwrctl_calc_iout(uint16_t raw)
 {
     float value = a_adc_k_coef * raw + a_adc_c_coef;
+    dbg_printf("raw: %d\n",(int)raw);
+    dbg_printf("k: %d\n",(int)a_adc_k_coef);
+    dbg_printf("c: %d\n",(int)a_adc_c_coef);
     if (value <= 0)
         return 0;
     else

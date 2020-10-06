@@ -196,6 +196,7 @@ void uui_handle_screen_event(uui_t *ui, event_t event)
         case event_ocp:
         case event_ovp:
             /** If current screen can be enabled */
+            dbg_printf("ovp\n");
             if (screen->enable) {
                 screen->is_enabled = !screen->is_enabled;
                 if (screen->is_enabled && screen->past_save) {
@@ -244,6 +245,7 @@ void uui_set_screen(uui_t *ui, uint32_t screen_idx)
         opendps_update_power_status(false); /** @todo: move */
         if (cur_screen->is_enabled) {
             /** Disable the old screen as it will no longer be in control of power out */
+            dbg_printf("new screen\n");
             cur_screen->enable(false);
             cur_screen->is_enabled = false;
         }
@@ -274,6 +276,7 @@ void uui_show(uui_t *ui, bool show)
 void uui_disable_cur_screen(uui_t *ui)
 {
     ui_screen_t *screen = ui->screens[ui->cur_screen];
+    dbg_printf("disable\n");
     if (screen->enable && screen->is_enabled) {
         screen->is_enabled = false;
         screen->enable(screen->is_enabled);

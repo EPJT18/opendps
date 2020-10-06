@@ -33,5 +33,6 @@
  * @param      ui    The user interface
  */
 void func_cl_init(uui_t *ui);
+uint32_t calc_swoop_current(int32_t voltage);
 
 #endif // __FUNC_CL_H__
